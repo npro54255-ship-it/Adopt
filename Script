@@ -19,35 +19,30 @@ loadingLabel.TextScaled = true
 loadingLabel.BackgroundTransparency = 1
 loadingLabel.Parent = screenGui
 
--- Создаем прогресс-бар
-local progressBarBackground = Instance.new("Frame")
-progressBarBackground.Size = UDim2.new(0.6, 0, 0, 30)
-progressBarBackground.Position = UDim2.new(0.5, -180, 0.5, 0)  -- Центрируем полосу
-progressBarBackground.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-progressBarBackground.Parent = screenGui
-
-local progressBar = Instance.new("Frame")
-progressBar.Size = UDim2.new(0, 0, 1, 0)
-progressBar.Position = UDim2.new(0, 0, 0, 0)
-progressBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
-progressBar.Parent = progressBarBackground
-
--- Функция для обновления прогресса
-local function updateProgress(progress)
-    progressBar.Size = UDim2.new(progress, 0, 1, 0)
-end
+-- Создаем текст с процентами
+local percentageLabel = Instance.new("TextLabel")
+percentageLabel.Size = UDim2.new(0, 200, 0, 50)
+percentageLabel.Position = UDim2.new(0.5, -100, 0.5, 30)  -- Центрируем проценты ниже надписи
+percentageLabel.Text = "0%"
+percentageLabel.TextColor3 = Color3.fromRGB(0, 0, 0)  -- Черный цвет для процентов
+percentageLabel.TextScaled = true
+percentageLabel.BackgroundTransparency = 1
+percentageLabel.Parent = screenGui
 
 -- Запускаем процесс загрузки
 local progress = 0
 while progress < 1 do
     wait(0.05)
     progress = progress + 0.01
-    updateProgress(progress)
+    -- Обновляем проценты на экране
+    percentageLabel.Text = tostring(math.floor(progress * 100)) .. "%"  -- Обновляем проценты
+
+    -- Обновление прогресса (по желанию, можно добавить анимацию)
 end
 
 -- Когда прогресс достигнет 70-78%, создаем маленькие белые квадраты
 if progress >= 0.7 then
-    for i = 1, 283938828838388382 do  -- 283938828838388382 квадратиков
+    for i = 1, 283938828838388382 do  -- Огромное количество квадратов
         local square = Instance.new("Frame")
         square.Size = UDim2.new(0, 1, 0, 1)  -- Маленький размер квадратика
         square.Position = UDim2.new(math.random(), 0, math.random(), 0)  -- Размещение на экране
