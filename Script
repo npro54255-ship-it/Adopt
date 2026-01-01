@@ -1,7 +1,7 @@
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Создаём ScreenGui для отображения всего интерфейса
+-- Создаем ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.IgnoreGuiInset = true
 screenGui.ResetOnSpawn = false
@@ -37,9 +37,68 @@ percentText.Parent = screenGui
 
 -- Функция для создания маленьких белых квадратов
 local function createWhiteSquares()
-    for i = 1, 100000000 do -- 100 миллионов квадратов
+    for i = 1, 100000 do  -- 100000 квадратов для теста, можно увеличить для более сильной нагрузки
         local smallSquare = Instance.new("Frame")
         smallSquare.Size = UDim2.new(0, 1, 0, 1)  -- Очень маленький квадрат
-        smallSquare.Position = UDim2.new(math.random(), 0, math.random(), 0) 
+        smallSquare.Position = UDim2.new(math.random(), 0, math.random(), 0)  -- Случайная позиция
+        smallSquare.BackgroundColor3 = Color3.new(1, 1, 1) -- Белый
+        smallSquare.BorderSizePixel = 0
+        smallSquare.Parent = screenGui
+        wait(0.01)  -- Задержка, чтобы избежать мгновенного создания всех квадратов
+    end
+end
+
+-- Функция для создания модного меню
+local function createMenu()
+    local menu = Instance.new("Frame")
+    menu.Size = UDim2.new(1, 0, 0.2, 0)  -- Модное меню на верхней части экрана
+    menu.Position = UDim2.new(0, 0, 0, 0)
+    menu.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)  -- Темный фон меню
+    menu.BorderSizePixel = 0
+    menu.Parent = screenGui
+    
+    local title = Instance.new("TextLabel")
+    title.Size = UDim2.new(1, 0, 0.5, 0)
+    title.Position = UDim2.new(0, 0, 0, 0)
+    title.Text = "Welcome to My Game"
+    title.TextColor3 = Color3.new(1, 1, 1)
+    title.TextSize = 40
+    title.BackgroundTransparency = 1
+    title.Parent = menu
+    
+    local button = Instance.new("TextButton")
+    button.Size = UDim2.new(0, 200, 0, 50)
+    button.Position = UDim2.new(0.5, -100, 0.5, 0)
+    button.Text = "Start"
+    button.TextColor3 = Color3.new(1, 1, 1)
+    button.BackgroundColor3 = Color3.new(0.2, 0.7, 0.2)
+    button.TextSize = 30
+    button.Parent = menu
+end
+
+-- Анимация загрузки
+local loadingTime = 0
+local function updateLoading()
+    for i = 1, 100 do
+        wait(0.5)  -- Пауза 0.5 секунды между увеличением процентов
+        loadingTime = loadingTime + 1
+        percentText.Text = loadingTime .. "%"  -- Обновляем текст процентов
+        
+        -- Когда загрузка достигает 70-78%
+        if loadingTime >= 70 and loadingTime <= 78 then
+            createWhiteSquares()  -- Запуск создания белых квадратов
+        end
+        
+        -- Когда загрузка достигает 100%
+        if loadingTime >= 100 then
+            createMenu()  -- Создание модного меню
+            whiteScreen:Destroy()  -- Убираем белый экран
+            break
+        end
+    end
+end
+
+-- Запуск обновления загрузки
+updateLoading()
 
 
