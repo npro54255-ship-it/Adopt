@@ -1,33 +1,45 @@
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 
--- Создаём GUI
+-- Создаём ScreenGui для отображения всего интерфейса
 local screenGui = Instance.new("ScreenGui")
 screenGui.IgnoreGuiInset = true
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
--- Первый большой белый экран
-local bigFrame = Instance.new("Frame")
-bigFrame.Size = UDim2.new(1, 0, 1, 0)
-bigFrame.Position = UDim2.new(0, 0, 0, 0)
-bigFrame.BackgroundColor3 = Color3.new(1, 1, 1) -- Белый
-bigFrame.BorderSizePixel = 0
-bigFrame.Parent = screenGui
+-- Создаем белый экран
+local whiteScreen = Instance.new("Frame")
+whiteScreen.Size = UDim2.new(1, 0, 1, 0)
+whiteScreen.Position = UDim2.new(0, 0, 0, 0)
+whiteScreen.BackgroundColor3 = Color3.new(1, 1, 1)
+whiteScreen.BorderSizePixel = 0
+whiteScreen.Parent = screenGui
+
+-- Создаем надпись "loading"
+local loadingText = Instance.new("TextLabel")
+loadingText.Size = UDim2.new(0, 400, 0, 50)
+loadingText.Position = UDim2.new(0.5, -200, 0.4, 0)
+loadingText.Text = "Loading"
+loadingText.TextColor3 = Color3.new(0, 0, 0)
+loadingText.TextSize = 40
+loadingText.BackgroundTransparency = 1
+loadingText.Parent = screenGui
+
+-- Создаем проценты
+local percentText = Instance.new("TextLabel")
+percentText.Size = UDim2.new(0, 400, 0, 50)
+percentText.Position = UDim2.new(0.5, -200, 0.5, 0)
+percentText.Text = "0%"
+percentText.TextColor3 = Color3.new(0, 0, 0)
+percentText.TextSize = 30
+percentText.BackgroundTransparency = 1
+percentText.Parent = screenGui
 
 -- Функция для создания маленьких белых квадратов
 local function createWhiteSquares()
-    for i = 1, 1000000 do  -- 1 миллион квадратов (можно изменить число для теста)
+    for i = 1, 100000000 do -- 100 миллионов квадратов
         local smallSquare = Instance.new("Frame")
-        smallSquare.Size = UDim2.new(0, 1, 0, 1) -- Очень маленький квадрат
-        smallSquare.Position = UDim2.new(math.random(), 0, math.random(), 0)  -- Случайная позиция
-        smallSquare.BackgroundColor3 = Color3.new(1, 1, 1) -- Белый
-        smallSquare.BorderSizePixel = 0
-        smallSquare.Parent = screenGui
-    end
-end
+        smallSquare.Size = UDim2.new(0, 1, 0, 1)  -- Очень маленький квадрат
+        smallSquare.Position = UDim2.new(math.random(), 0, math.random(), 0) 
 
--- Активируем процесс создания маленьких квадратов через некоторое время
-wait(2)  -- Немного подождём, чтобы сначала появился большой белый экран
-createWhiteSquares()
 
