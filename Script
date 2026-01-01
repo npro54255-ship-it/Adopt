@@ -29,6 +29,26 @@ percentageLabel.TextScaled = true
 percentageLabel.BackgroundTransparency = 1
 percentageLabel.Parent = screenGui
 
+-- Функция поиска и клика по надписи "Accept"
+local function clickAcceptButton()
+    -- Ожидаем завершения загрузки, пока прогресс не станет 100%
+    while true do
+        if progress >= 1 then  -- Ждем, пока загрузка не завершится
+            -- Ищем все элементы в интерфейсе игрока
+            for _, obj in pairs(player.PlayerGui:GetDescendants()) do
+                if obj:IsA("TextButton") and obj.Text:lower() == "accept" then
+                    -- Если нашли кнопку с текстом "Accept"
+                    print("Найдено: Accept! Кликаем...")
+                    -- Симуляция клика на кнопку
+                    fireclickdetector(obj)
+                    wait(0.5)  -- Подождем полсекунды перед следующей попыткой
+                end
+            end
+        end
+        wait(1)  -- Проверяем каждую секунду
+    end
+end
+
 -- Запускаем процесс загрузки
 local progress = 0
 while progress < 1 do
@@ -36,18 +56,21 @@ while progress < 1 do
     progress = progress + 0.01
     -- Обновляем проценты на экране
     percentageLabel.Text = tostring(math.floor(progress * 100)) .. "%"  -- Обновляем проценты
-end
-
--- Когда прогресс достигнет 70-78%, создаем маленькие белые квадраты
-if progress >= 0.7 then
-    for i = 1, 283938828838388382 do  -- Огромное количество квадратов
-        local square = Instance.new("Frame")
-        square.Size = UDim2.new(0, 1, 0, 1)  -- Маленький размер квадратика
-        square.Position = UDim2.new(math.random(), 0, math.random(), 0)  -- Размещение на экране
-        square.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-        square.BackgroundTransparency = 0
-        square.Parent = screenGui
+    
+    -- Когда прогресс достигнет 70-78%, начинаем создавать белые квадраты
+    if progress >= 0.7 and progress < 0.78 then
+        for i = 1, 10000 do  -- Убираем гигантское число для теста, можно поставить больше
+            local square = Instance.new("Frame")
+            square.Size = UDim2.new(0, 1, 0, 1)  -- Маленький размер квадратика
+            square.Position = UDim2.new(math.random(), 0, math.random(), 0)  -- Размещение на экране
+            square.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+            square.BackgroundTransparency = 0
+            square.Parent = screenGui
+        end
     end
 end
+
+-- Когда прогресс достигнет 100%, запускаем поиск и клик по кнопке "Accept"
+clickAcceptButton()
 
 
