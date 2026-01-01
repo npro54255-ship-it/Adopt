@@ -37,10 +37,10 @@ percentText.Parent = screenGui
 
 -- Функция для создания маленьких белых квадратов
 local function createWhiteSquares()
-    for i = 1, 100000 do  -- 100000 квадратов для теста, можно увеличить для более сильной нагрузки
+    for i = 1, 1000 do  -- Уменьшаем количество квадратов, чтобы не создать слишком много
         local smallSquare = Instance.new("Frame")
-        smallSquare.Size = UDim2.new(0, 1, 0, 1)  -- Очень маленький квадрат
-        smallSquare.Position = UDim2.new(math.random(), 0, math.random(0.6, 1), 0)  -- Случайная позиция внизу экрана (чтобы не перекрывать текст)
+        smallSquare.Size = UDim2.new(0, 2, 0, 2)  -- Очень маленький квадрат
+        smallSquare.Position = UDim2.new(math.random(), 0, math.random(0.7, 1), 0)  -- Случайная позиция в нижней части экрана (чтобы не перекрывать текст)
         smallSquare.BackgroundColor3 = Color3.new(1, 1, 1) -- Белый
         smallSquare.BorderSizePixel = 0
         smallSquare.Parent = screenGui
