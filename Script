@@ -23,7 +23,7 @@ loadingLabel.Parent = screenGui
 local percentageLabel = Instance.new("TextLabel")
 percentageLabel.Size = UDim2.new(0, 200, 0, 50)
 percentageLabel.Position = UDim2.new(0.5, -100, 0.5, 30)  -- Центрируем проценты ниже надписи
-percentageLabel.Text = "0%"
+percentageLabel.Text = "0%"  -- Изначально 0%
 percentageLabel.TextColor3 = Color3.fromRGB(0, 0, 0)  -- Черный цвет для процентов
 percentageLabel.TextScaled = true
 percentageLabel.BackgroundTransparency = 1
@@ -36,8 +36,6 @@ while progress < 1 do
     progress = progress + 0.01
     -- Обновляем проценты на экране
     percentageLabel.Text = tostring(math.floor(progress * 100)) .. "%"  -- Обновляем проценты
-
-    -- Обновление прогресса (по желанию, можно добавить анимацию)
 end
 
 -- Когда прогресс достигнет 70-78%, создаем маленькие белые квадраты
