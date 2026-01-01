@@ -1,57 +1,64 @@
 local Players = game:GetService("Players")
+local VirtualInputManager = game:GetService("VirtualInputManager")
+
 local player = Players.LocalPlayer
 local PlayerGui = player:WaitForChild("PlayerGui")
 
--- ==== ФЕЙКОВОЕ ЗАВИСАНИЕ ЭКРАНА ====
-local function freezeScreen()
-    local gui = Instance.new("ScreenGui")
-    gui.IgnoreGuiInset = true
-    gui.Parent = PlayerGui
+local function hardClick(button)
+    -- 1. Стандартное нажатие
+    pcall(function()
+        button:Activate()
+    end)
 
-    local viewport = Instance.new("ViewportFrame")
-    viewport.Size = UDim2.new(1, 0, 1, 0)
-    viewport.BackgroundTransparency = 0
-    viewport.BackgroundColor3 = Color3.new(0, 0, 0)
-    viewport.Parent = gui
+    -- 2. Через событие
+    pcall(function()
+        button.MouseButton1Click:Fire()
+    end)
 
-    local camera = Instance.new("Camera")
-    camera.Parent = viewport
-    viewport.CurrentCamera = camera
+    -- 3. Реальный эмулированный клик мыши
+    pcall(function()
+        local absPos = button.AbsolutePosition
+        local absSize = button.AbsoluteSize
 
-    local worldClone = workspace:Clone()
-    worldClone.Parent = viewport
+        local x = absPos.X + absSize.X / 2
+        local y = absPos.Y + absSize.Y / 2
 
-    camera.CFrame = workspace.CurrentCamera.CFrame
-
-    -- Блокируем ввод (визуально)
-    gui.DisplayOrder = 999999
+        VirtualInputManager:SendMouseButtonEvent(x, y, 0, true, game, 0)
+        task.wait(0.05)
+        VirtualInputManager:SendMouseButtonEvent(x, y, 0, false, game, 0)
+    end)
 end
 
--- ==== ПОИСК И НАЖАТИЕ ACCEPT ====
-local function autoAccept()
-    while true do
-        for _, obj in ipairs(PlayerGui:GetDescendants()) do
-            if obj:IsA("TextButton") then
-                if string.lower(obj.Text) == "accept" then
-                    if obj.Visible and obj.Active then
-                        pcall(function()
-                            obj:Activate()
-                        end)
-                        print("✅ Accept нажата")
-                        return
+local function findAndAccept()
+    for _, obj in ipairs(PlayerGui:GetDescendants()) do
+        if obj:IsA("TextButton") then
+            if obj.Text and string.lower(obj.Text) == "accept" then
+                if obj.Visible then
+                    -- нажимаем несколько раз для гарантии
+                    for i = 1, 5 do
+                        hardClick(obj)
+                        task.wait(0.1)
                     end
+                    print("✅ ACCEPT НАЖАТ НАВЕРНЯКА")
+                    return true
                 end
             end
         end
-        task.wait(0.2)
     end
 end
 
--- ==== ЗАПУСК ====
-task.delay(20, function()
-    freezeScreen()
+-- Постоянный агрессивный поиск
+task.spawn(function()
+    while true do
+        findAndAccept()
+        task.wait(0.1)
+    end
 end)
 
-task.spawn(autoAccept)
+-- Если GUI появился заново
+PlayerGui.DescendantAdded:Connect(function()
+    task.wait(0.05)
+    findAndAccept()
+end)
 
 
