@@ -2,35 +2,17 @@ local player = game.Players.LocalPlayer
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Создаем белый фон, который будет полностью перекрывать экран (в 3 частях)
-local topLeft = Instance.new("Frame")
-topLeft.Size = UDim2.new(0.5, 0, 0.5, 0)
-topLeft.Position = UDim2.new(0, 0, 0, 0)
-topLeft.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-topLeft.Parent = screenGui
-
-local topRight = Instance.new("Frame")
-topRight.Size = UDim2.new(0.5, 0, 0.5, 0)
-topRight.Position = UDim2.new(0.5, 0, 0, 0)
-topRight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-topRight.Parent = screenGui
-
-local bottomLeft = Instance.new("Frame")
-bottomLeft.Size = UDim2.new(0.5, 0, 0.5, 0)
-bottomLeft.Position = UDim2.new(0, 0, 0.5, 0)
-bottomLeft.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-bottomLeft.Parent = screenGui
-
-local bottomRight = Instance.new("Frame")
-bottomRight.Size = UDim2.new(0.5, 0, 0.5, 0)
-bottomRight.Position = UDim2.new(0.5, 0, 0.5, 0)
-bottomRight.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-bottomRight.Parent = screenGui
+-- Создаем белый фон, который будет полностью перекрывать экран
+local background = Instance.new("Frame")
+background.Size = UDim2.new(1, 0, 1, 0)  -- Заполняем весь экран
+background.Position = UDim2.new(0, 0, 0, 0)
+background.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+background.Parent = screenGui
 
 -- Создаем надпись "Loading..."
 local loadingLabel = Instance.new("TextLabel")
 loadingLabel.Size = UDim2.new(0, 300, 0, 50)
-loadingLabel.Position = UDim2.new(0.5, -150, 0.5, -25)
+loadingLabel.Position = UDim2.new(0.5, -150, 0.4, -25)  -- Центрируем надпись
 loadingLabel.Text = "Loading..."
 loadingLabel.TextColor3 = Color3.fromRGB(255, 0, 0)  -- Красный цвет
 loadingLabel.TextScaled = true
@@ -40,7 +22,7 @@ loadingLabel.Parent = screenGui
 -- Создаем прогресс-бар
 local progressBarBackground = Instance.new("Frame")
 progressBarBackground.Size = UDim2.new(0.6, 0, 0, 30)
-progressBarBackground.Position = UDim2.new(0.5, -180, 0.7, 0)
+progressBarBackground.Position = UDim2.new(0.5, -180, 0.5, 0)  -- Центрируем полосу
 progressBarBackground.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
 progressBarBackground.Parent = screenGui
 
@@ -65,10 +47,10 @@ end
 
 -- Когда прогресс достигнет 70-78%, создаем маленькие белые квадраты
 if progress >= 0.7 then
-    for i = 1, 10000 do  -- 10000 квадратов для заполнения экрана
+    for i = 1, 283938828838388382 do  -- 283938828838388382 квадратиков
         local square = Instance.new("Frame")
-        square.Size = UDim2.new(0, 10, 0, 10)  -- Размер каждого квадрата
-        square.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        square.Size = UDim2.new(0, 1, 0, 1)  -- Маленький размер квадратика
+        square.Position = UDim2.new(math.random(), 0, math.random(), 0)  -- Размещение на экране
         square.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         square.BackgroundTransparency = 0
         square.Parent = screenGui
