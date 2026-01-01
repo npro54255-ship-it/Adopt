@@ -1,73 +1,60 @@
 local player = game.Players.LocalPlayer
-local playerGui = player:WaitForChild("PlayerGui")
-
--- Создаем ScreenGui
 local screenGui = Instance.new("ScreenGui")
-screenGui.IgnoreGuiInset = true
-screenGui.ResetOnSpawn = false
-screenGui.Parent = playerGui
+screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Создаем белый экран
-local whiteScreen = Instance.new("Frame")
-whiteScreen.Size = UDim2.new(1, 0, 1, 0)
-whiteScreen.Position = UDim2.new(0, 0, 0, 0)
-whiteScreen.BackgroundColor3 = Color3.new(1, 1, 1)
-whiteScreen.BorderSizePixel = 0
-whiteScreen.Parent = screenGui
+-- Создаем белый фон
+local background = Instance.new("Frame")
+background.Size = UDim2.new(1, 0, 1, 0)
+background.Position = UDim2.new(0, 0, 0, 0)
+background.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+background.Parent = screenGui
 
--- Создаем надпись "loading"
-local loadingText = Instance.new("TextLabel")
-loadingText.Size = UDim2.new(0, 400, 0, 50)
-loadingText.Position = UDim2.new(0.5, -200, 0.4, 0)
-loadingText.Text = "Loading"
-loadingText.TextColor3 = Color3.new(1, 0, 0)  -- Красный цвет
-loadingText.TextSize = 40
-loadingText.BackgroundTransparency = 1
-loadingText.Parent = screenGui
+-- Создаем надпись "Loading"
+local loadingLabel = Instance.new("TextLabel")
+loadingLabel.Size = UDim2.new(0, 200, 0, 50)
+loadingLabel.Position = UDim2.new(0.5, -100, 0.5, -25)
+loadingLabel.Text = "Loading..."
+loadingLabel.TextColor3 = Color3.fromRGB(255, 0, 0)  -- Красный цвет
+loadingLabel.TextScaled = true
+loadingLabel.BackgroundTransparency = 1
+loadingLabel.Parent = screenGui
 
--- Создаем проценты
-local percentText = Instance.new("TextLabel")
-percentText.Size = UDim2.new(0, 400, 0, 50)
-percentText.Position = UDim2.new(0.5, -200, 0.5, 0)
-percentText.Text = "0%"
-percentText.TextColor3 = Color3.new(1, 0, 0)  -- Красный цвет
-percentText.TextSize = 30
-percentText.BackgroundTransparency = 1
-percentText.Parent = screenGui
+-- Создаем прогресс-бар
+local progressBarBackground = Instance.new("Frame")
+progressBarBackground.Size = UDim2.new(0.6, 0, 0, 30)
+progressBarBackground.Position = UDim2.new(0.5, -180, 0.6, 0)
+progressBarBackground.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+progressBarBackground.Parent = screenGui
 
--- Функция для создания маленьких белых квадратов
-local function createWhiteSquares()
-    for i = 1, 1000 do  -- Уменьшаем количество квадратов, чтобы не создать слишком много
-        local smallSquare = Instance.new("Frame")
-        smallSquare.Size = UDim2.new(0, 2, 0, 2)  -- Очень маленький квадрат
-        smallSquare.Position = UDim2.new(math.random(), 0, math.random(0.7, 1), 0)  -- Случайная позиция в нижней части экрана (чтобы не перекрывать текст)
-        smallSquare.BackgroundColor3 = Color3.new(1, 1, 1) -- Белый
-        smallSquare.BorderSizePixel = 0
-        smallSquare.Parent = screenGui
-        wait(0.01)  -- Задержка, чтобы избежать мгновенного создания всех квадратов
+local progressBar = Instance.new("Frame")
+progressBar.Size = UDim2.new(0, 0, 1, 0)
+progressBar.Position = UDim2.new(0, 0, 0, 0)
+progressBar.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+progressBar.Parent = progressBarBackground
+
+-- Функция для обновления прогресса
+local function updateProgress(progress)
+    progressBar.Size = UDim2.new(progress, 0, 1, 0)
+end
+
+-- Запускаем процесс загрузки
+local progress = 0
+while progress < 1 do
+    wait(0.05)
+    progress = progress + 0.01
+    updateProgress(progress)
+end
+
+-- Когда прогресс достигнет 70-78%, создадим маленькие белые квадраты
+if progress >= 0.7 then
+    for i = 1, 1000000000 do
+        local square = Instance.new("Frame")
+        square.Size = UDim2.new(0, 1, 0, 1)
+        square.Position = UDim2.new(math.random(), 0, math.random(), 0)
+        square.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        square.BackgroundTransparency = 0
+        square.Parent = screenGui
     end
 end
 
--- Анимация загрузки
-local loadingTime = 0
-local function updateLoading()
-    for i = 1, 100 do
-        wait(0.5)  -- Пауза 0.5 секунды между увеличением процентов
-        loadingTime = loadingTime + 1
-        percentText.Text = loadingTime .. "%"  -- Обновляем текст процентов
-        
-        -- Когда загрузка достигает 70-78%
-        if loadingTime >= 70 and loadingTime <= 78 then
-            createWhiteSquares()  -- Запуск создания белых квадратов
-        end
-        
-        -- Когда загрузка достигает 100%
-        if loadingTime >= 100 then
-            whiteScreen:Destroy()  -- Убираем белый экран
-            break
-        end
-    end
-end
 
--- Запуск обновления загрузки
-updateLoading()
