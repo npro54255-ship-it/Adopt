@@ -2,7 +2,7 @@ local player = game.Players.LocalPlayer
 local screenGui = Instance.new("ScreenGui")
 screenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Создаем белый фон
+-- Создаем белый фон, который будет полностью перекрывать экран
 local background = Instance.new("Frame")
 background.Size = UDim2.new(1, 0, 1, 0)
 background.Position = UDim2.new(0, 0, 0, 0)
@@ -11,8 +11,8 @@ background.Parent = screenGui
 
 -- Создаем надпись "Loading"
 local loadingLabel = Instance.new("TextLabel")
-loadingLabel.Size = UDim2.new(0, 200, 0, 50)
-loadingLabel.Position = UDim2.new(0.5, -100, 0.5, -25)
+loadingLabel.Size = UDim2.new(0, 300, 0, 50)
+loadingLabel.Position = UDim2.new(0.5, -150, 0.5, -25)
 loadingLabel.Text = "Loading..."
 loadingLabel.TextColor3 = Color3.fromRGB(255, 0, 0)  -- Красный цвет
 loadingLabel.TextScaled = true
@@ -45,11 +45,11 @@ while progress < 1 do
     updateProgress(progress)
 end
 
--- Когда прогресс достигнет 70-78%, создадим маленькие белые квадраты
+-- Когда прогресс достигнет 70-78%, создаем большие белые квадраты
 if progress >= 0.7 then
-    for i = 1, 1000000000 do
+    for i = 1, 10000 do  -- 10000 квадратов для заполнения экрана
         local square = Instance.new("Frame")
-        square.Size = UDim2.new(0, 1, 0, 1)
+        square.Size = UDim2.new(0, 50, 0, 50)  -- Размер каждого квадрата
         square.Position = UDim2.new(math.random(), 0, math.random(), 0)
         square.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         square.BackgroundTransparency = 0
