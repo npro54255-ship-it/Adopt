@@ -1,0 +1,1407 @@
+-- Adopt Me Trade Currency Calculator - COMPLETE DATABASE
+-- Автор: sherikyt
+-- Версия: 2.0
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- Основной модуль
+local SherikytCurrencyCalculator = {}
+SherikytCurrencyCalculator.__index = SherikytCurrencyCalculator
+
+-- КОНФИГУРАЦИЯ
+SherikytCurrencyCalculator.Config = {
+    UPDATE_INTERVAL = 1.5,
+    DEBUG_MODE = true,
+    API_ENABLED = false, -- Можно включить если найдете API
+    SHOW_ALL_PETS = true
+}
+
+-- ПОЛНАЯ БАЗА ДАННЫХ ВСЕХ ПИТОМЦОВ (АКТУАЛЬНО)
+SherikytCurrencyCalculator.CompletePetDatabase = {
+    -- =========== LEGENDARY PETS ===========
+    ["Shadow Dragon"] = {Value = 1000, Rarity = "Legendary", Type = "Dragon"},
+    ["Bat Dragon"] = {Value = 950, Rarity = "Legendary", Type = "Dragon"},
+    ["Giraffe"] = {Value = 900, Rarity = "Legendary", Type = "Safari"},
+    ["Frost Dragon"] = {Value = 850, Rarity = "Legendary", Type = "Winter"},
+    ["Owl"] = {Value = 800, Rarity = "Legendary", Type = "Farm"},
+    ["Parrot"] = {Value = 780, Rarity = "Legendary", Type = "Pirate"},
+    ["Evil Unicorn"] = {Value = 750, Rarity = "Legendary", Type = "Halloween"},
+    ["Crow"] = {Value = 720, Rarity = "Legendary", Type = "Farm"},
+    ["Arctic Reindeer"] = {Value = 700, Rarity = "Legendary", Type = "Christmas"},
+    ["King Monkey"] = {Value = 650, Rarity = "Legendary", Type = "Monkey"},
+    ["Albino Monkey"] = {Value = 620, Rarity = "Legendary", Type = "Monkey"},
+    ["Diamond Griffin"] = {Value = 600, Rarity = "Legendary", Type = "Diamond"},
+    ["Diamond Unicorn"] = {Value = 580, Rarity = "Legendary", Type = "Diamond"},
+    ["Diamond Dragon"] = {Value = 550, Rarity = "Legendary", Type = "Diamond"},
+    
+    -- Robux/Limited Legendary
+    ["Skeleton Rex"] = {Value = 900, Rarity = "Legendary", Type = "Halloween"},
+    ["Ghost Dragon"] = {Value = 850, Rarity = "Legendary", Type = "Halloween"},
+    ["Turtle"] = {Value = 400, Rarity = "Legendary", Type = "Aussie"},
+    ["Kangaroo"] = {Value = 350, Rarity = "Legendary", Type = "Aussie"},
+    ["Golden Penguin"] = {Value = 300, Rarity = "Legendary", Type = "Winter"},
+    ["Golden Griffin"] = {Value = 280, Rarity = "Legendary", Type = "Golden"},
+    ["Golden Unicorn"] = {Value = 270, Rarity = "Legendary", Type = "Golden"},
+    ["Golden Dragon"] = {Value = 260, Rarity = "Legendary", Type = "Golden"},
+    
+    -- Other Legendary
+    ["Unicorn"] = {Value = 250, Rarity = "Legendary", Type = "Common"},
+    ["Dragon"] = {Value = 240, Rarity = "Legendary", Type = "Common"},
+    ["Griffin"] = {Value = 230, Rarity = "Legendary", Type = "Mythic"},
+    ["Kitsune"] = {Value = 220, Rarity = "Legendary", Type = "Japan"},
+    ["Cerberus"] = {Value = 210, Rarity = "Legendary", Type = "Mythic"},
+    ["Guardian Lion"] = {Value = 200, Rarity = "Legendary", Type = "Lunar"},
+    ["Dodo"] = {Value = 190, Rarity = "Legendary", Type = "Fossil"},
+    ["T-Rex"] = {Value = 180, Rarity = "Legendary", Type = "Fossil"},
+    ["Snow Owl"] = {Value = 170, Rarity = "Legendary", Type = "Winter"},
+    ["Frost Fury"] = {Value = 160, Rarity = "Legendary", Type = "Winter"},
+    ["Phoenix"] = {Value = 150, Rarity = "Legendary", Type = "Mythic"},
+    ["Shark"] = {Value = 140, Rarity = "Legendary", Type = "Ocean"},
+    ["Octopus"] = {Value = 130, Rarity = "Legendary", Type = "Ocean"},
+    ["Goldhorn"] = {Value = 120, Rarity = "Legendary", Type = "Lunar"},
+    ["Diamond Ladybug"] = {Value = 110, Rarity = "Legendary", Type = "Diamond"},
+    ["Axolotl"] = {Value = 100, Rarity = "Legendary", Type = "Ocean"},
+    ["Ice Golem"] = {Value = 95, Rarity = "Legendary", Type = "Winter"},
+    ["Lavender Dragon"] = {Value = 90, Rarity = "Legendary", Type = "Dragon"},
+    ["Sugar Glider"] = {Value = 85, Rarity = "Legendary", Type = "Urban"},
+    ["Queen Bee"] = {Value = 80, Rarity = "Legendary", Type = "Farm"},
+    ["Diamond Butterfly"] = {Value = 75, Rarity = "Legendary", Type = "Diamond"},
+    ["Chameleon"] = {Value = 70, Rarity = "Legendary", Type = "Safari"},
+    ["Squid"] = {Value = 65, Rarity = "Legendary", Type = "Ocean"},
+    ["Green Butterfly"] = {Value = 60, Rarity = "Legendary", Type = "Garden"},
+    ["Field Mouse"] = {Value = 55, Rarity = "Legendary", Type = "Farm"},
+    ["Shetland Pony White"] = {Value = 50, Rarity = "Legendary", Type = "Farm"},
+    ["Shetland Pony Brown"] = {Value = 50, Rarity = "Legendary", Type = "Farm"},
+    ["Shetland Pony Pink"] = {Value = 50, Rarity = "Legendary", Type = "Farm"},
+    ["Mechapup"] = {Value = 45, Rarity = "Legendary", Type = "Robux"},
+    ["Mega Cat"] = {Value = 40, Rarity = "Legendary", Type = "Mega"},
+    ["Mega Dog"] = {Value = 40, Rarity = "Legendary", Type = "Mega"},
+    ["Mega Buffalo"] = {Value = 35, Rarity = "Legendary", Type = "Mega"},
+    ["Mega Otter"] = {Value = 35, Rarity = "Legendary", Type = "Mega"},
+    
+    -- =========== ULTRA RARE PETS ===========
+    ["Swan"] = {Value = 30, Rarity = "Ultra Rare", Type = "Farm"},
+    ["Cow"] = {Value = 28, Rarity = "Ultra Rare", Type = "Farm"},
+    ["Hedgehog"] = {Value = 26, Rarity = "Ultra Rare", Type = "Christmas"},
+    ["Elephant"] = {Value = 24, Rarity = "Ultra Rare", Type = "Safari"},
+    ["Pig"] = {Value = 22, Rarity = "Ultra Rare", Type = "Farm"},
+    ["Platypus"] = {Value = 20, Rarity = "Ultra Rare", Type = "Aussie"},
+    ["Zombie Buffalo"] = {Value = 18, Rarity = "Ultra Rare", Type = "Halloween"},
+    ["Turkey"] = {Value = 16, Rarity = "Ultra Rare", Type = "Farm"},
+    ["Llama"] = {Value = 15, Rarity = "Ultra Rare", Type = "Farm"},
+    ["Puffin"] = {Value = 14, Rarity = "Ultra Rare", Type = "Winter"},
+    ["Reindeer"] = {Value = 13, Rarity = "Ultra Rare", Type = "Christmas"},
+    ["Brown Bear"] = {Value = 12, Rarity = "Ultra Rare", Type = "Forest"},
+    ["Polar Bear"] = {Value = 11, Rarity = "Ultra Rare", Type = "Winter"},
+    ["Hyena"] = {Value = 10, Rarity = "Ultra Rare", Type = "Safari"},
+    ["Yeti"] = {Value = 9, Rarity = "Ultra Rare", Type = "Winter"},
+    ["Albino Bat"] = {Value = 8, Rarity = "Ultra Rare", Type = "Halloween"},
+    ["Silly Duck"] = {Value = 7, Rarity = "Ultra Rare", Type = "Farm"},
+    ["Drake"] = {Value = 6, Rarity = "Ultra Rare", Type = "Farm"},
+    ["Black Panther"] = {Value = 5, Rarity = "Ultra Rare", Type = "Jungle"},
+    ["Pink Cat"] = {Value = 4, Rarity = "Ultra Rare", Type = "Common"},
+    ["Blue Dog"] = {Value = 3, Rarity = "Ultra Rare", Type = "Common"},
+    ["Flamingo"] = {Value = 2, Rarity = "Ultra Rare", Type = "Safari"},
+    ["Lion"] = {Value = 1, Rarity = "Ultra Rare", Type = "Safari"},
+}
+-- Продолжение базы данных
+SherikytCurrencyCalculator.CompletePetDatabase = SherikytCurrencyCalculator.CompletePetDatabase or {}
+
+-- Добавляем остальные питомцы к существующей таблице
+local additionalPets = {
+    -- =========== RARE PETS ===========
+    ["Bee"] = {Value = 50, Rarity = "Rare", Type = "Farm"},
+    ["Penguin"] = {Value = 45, Rarity = "Rare", Type = "Winter"},
+    ["Red Panda"] = {Value = 40, Rarity = "Rare", Type = "Japan"},
+    ["Shrew"] = {Value = 35, Rarity = "Rare", Type = "Winter"},
+    ["Sloth"] = {Value = 30, Rarity = "Rare", Type = "Jungle"},
+    ["Rhino"] = {Value = 25, Rarity = "Rare", Type = "Safari"},
+    ["Emu"] = {Value = 20, Rarity = "Rare", Type = "Aussie"},
+    ["Rabbit"] = {Value = 15, Rarity = "Rare", Type = "Farm"},
+    ["Snowman"] = {Value = 10, Rarity = "Rare", Type = "Winter"},
+    ["Wolf"] = {Value = 8, Rarity = "Rare", Type = "Forest"},
+    ["Shiba Inu"] = {Value = 7, Rarity = "Rare", Type = "Japan"},
+    ["Pterodactyl"] = {Value = 6, Rarity = "Rare", Type = "Fossil"},
+    ["Deinonychus"] = {Value = 5, Rarity = "Rare", Type = "Fossil"},
+    ["Stegosaurus"] = {Value = 4, Rarity = "Rare", Type = "Fossil"},
+    ["Triceratops"] = {Value = 3, Rarity = "Rare", Type = "Fossil"},
+    ["Woolly Mammoth"] = {Value = 2, Rarity = "Rare", Type = "Fossil"},
+    ["Sabertooth"] = {Value = 1, Rarity = "Rare", Type = "Fossil"},
+    
+    -- =========== UNCOMMON PETS ===========
+    ["Cat"] = {Value = 5, Rarity = "Uncommon", Type = "Common"},
+    ["Dog"] = {Value = 5, Rarity = "Uncommon", Type = "Common"},
+    ["Black Bat"] = {Value = 4, Rarity = "Uncommon", Type = "Halloween"},
+    ["Chocolate Labrador"] = {Value = 3, Rarity = "Uncommon", Type = "Dog"},
+    ["Shiba Inu"] = {Value = 2, Rarity = "Uncommon", Type = "Dog"},
+    ["Poodle"] = {Value = 1, Rarity = "Uncommon", Type = "Dog"},
+    ["Blue Cat"] = {Value = 1, Rarity = "Uncommon", Type = "Cat"},
+    ["Orange Cat"] = {Value = 1, Rarity = "Uncommon", Type = "Cat"},
+    ["White Cat"] = {Value = 1, Rarity = "Uncommon", Type = "Cat"},
+    ["Chicken"] = {Value = 2, Rarity = "Uncommon", Type = "Farm"},
+    ["Robin"] = {Value = 1, Rarity = "Uncommon", Type = "Farm"},
+    ["Cardinal"] = {Value = 1, Rarity = "Uncommon", Type = "Farm"},
+    
+    -- =========== COMMON PETS ===========
+    ["Buffalo"] = {Value = 1, Rarity = "Common", Type = "Farm"},
+    ["Otter"] = {Value = 1, Rarity = "Common", Type = "River"},
+    ["Bandicoot"] = {Value = 1, Rarity = "Common", Type = "Aussie"},
+    ["Tasmanian Tiger"] = {Value = 1, Rarity = "Common", Type = "Aussie"},
+    ["Stingray"] = {Value = 1, Rarity = "Common", Type = "Ocean"},
+    ["Clownfish"] = {Value = 1, Rarity = "Common", Type = "Ocean"},
+    ["Seahorse"] = {Value = 1, Rarity = "Common", Type = "Ocean"},
+    ["Dolphin"] = {Value = 1, Rarity = "Common", Type = "Ocean"},
+    ["Narwhal"] = {Value = 1, Rarity = "Common", Type = "Ocean"},
+    ["Walrus"] = {Value = 1, Rarity = "Common", Type = "Winter"},
+    ["Snow Cat"] = {Value = 1, Rarity = "Common", Type = "Winter"},
+    ["Snow Puma"] = {Value = 1, Rarity = "Common", Type = "Winter"},
+    ["Arctic Fox"] = {Value = 1, Rarity = "Common", Type = "Winter"},
+    ["Puma"] = {Value = 1, Rarity = "Common", Type = "Jungle"},
+    ["Fennec Fox"] = {Value = 1, Rarity = "Common", Type = "Desert"},
+    ["Meerkat"] = {Value = 1, Rarity = "Common", Type = "Desert"},
+    ["Camel"] = {Value = 1, Rarity = "Common", Type = "Desert"},
+    
+    -- =========== LIMITED/EGG PETS ===========
+    -- Christmas Eggs
+    ["Christmas Egg"] = {Value = 500, Rarity = "Limited", Type = "Egg"},
+    ["Festive Egg"] = {Value = 450, Rarity = "Limited", Type = "Egg"},
+    
+    -- Farm Eggs
+    ["Farm Egg"] = {Value = 400, Rarity = "Limited", Type = "Egg"},
+    ["Jungle Egg"] = {Value = 350, Rarity = "Limited", Type = "Egg"},
+    ["Safari Egg"] = {Value = 300, Rarity = "Limited", Type = "Egg"},
+    
+    -- Aussie Eggs
+    ["Aussie Egg"] = {Value = 250, Rarity = "Limited", Type = "Egg"},
+    ["Fossil Egg"] = {Value = 200, Rarity = "Limited", Type = "Egg"},
+    ["Ocean Egg"] = {Value = 150, Rarity = "Limited", Type = "Egg"},
+    ["Mythic Egg"] = {Value = 100, Rarity = "Limited", Type = "Egg"},
+    ["Woodland Egg"] = {Value = 80, Rarity = "Limited", Type = "Egg"},
+    ["Japan Egg"] = {Value = 70, Rarity = "Limited", Type = "Egg"},
+    ["Southeast Asia Egg"] = {Value = 60, Rarity = "Limited", Type = "Egg"},
+    ["Royal Egg"] = {Value = 50, Rarity = "Limited", Type = "Egg"},
+    ["Pet Egg"] = {Value = 10, Rarity = "Limited", Type = "Egg"},
+    ["Cracked Egg"] = {Value = 1, Rarity = "Limited", Type = "Egg"},
+    
+    -- =========== VEHICLES/TOYS ===========
+    ["Hoverboard"] = {Value = 100, Rarity = "Vehicle", Type = "Transport"},
+    ["Train"] = {Value = 80, Rarity = "Vehicle", Type = "Transport"},
+    ["Cloud"] = {Value = 60, Rarity = "Vehicle", Type = "Transport"},
+    ["Broomstick"] = {Value = 40, Rarity = "Vehicle", Type = "Halloween"},
+    ["Go-Kart"] = {Value = 20, Rarity = "Vehicle", Type = "Transport"},
+    ["Donut Cycle"] = {Value = 15, Rarity = "Vehicle", Type = "Food"},
+    ["Heart Hoverboard"] = {Value = 10, Rarity = "Vehicle", Type = "Valentine"},
+    
+    -- =========== STROLLERS ===========
+    ["Cannon Stroller"] = {Value = 50, Rarity = "Stroller", Type = "Pirate"},
+    ["Egg Stroller"] = {Value = 30, Rarity = "Stroller", Type = "Easter"},
+    ["Rainbow Stroller"] = {Value = 20, Rarity = "Stroller", Type = "Rainbow"},
+    ["Duck Stroller"] = {Value = 10, Rarity = "Stroller", Type = "Farm"},
+    
+    -- =========== PET WEAR ===========
+    ["Head Chef"] = {Value = 30, Rarity = "Pet Wear", Type = "Clothing"},
+    ["Sombrero"] = {Value = 20, Rarity = "Pet Wear", Type = "Clothing"},
+    ["Santa Hat"] = {Value = 15, Rarity = "Pet Wear", Type = "Christmas"},
+    ["Witch Hat"] = {Value = 10, Rarity = "Pet Wear", Type = "Halloween"},
+    ["Fez"] = {Value = 5, Rarity = "Pet Wear", Type = "Clothing"},
+}
+
+-- Объединяем таблицы
+for petName, data in pairs(additionalPets) do
+    SherikytCurrencyCalculator.CompletePetDatabase[petName] = data
+end
+
+-- МОДИФИКАТОРЫ ДЛЯ ВСЕХ ВОЗМОЖНЫХ ВАРИАЦИЙ
+SherikytCurrencyCalculator.PotionModifiers = {
+    -- Базовые модификаторы
+    ["FR"] = {Multiplier = 1.5, Name = "Fly Ride", Code = "FR"},
+    ["R"] = {Multiplier = 1.3, Name = "Ride", Code = "R"},
+    ["F"] = {Multiplier = 1.2, Name = "Fly", Code = "F"},
+    ["N"] = {Multiplier = 1.0, Name = "Normal", Code = "N"},
+    ["M"] = {Multiplier = 2.0, Name = "Mega", Code = "M"},
+    
+    -- Неоновые модификаторы
+    ["NEON"] = {Multiplier = 2.5, Name = "Neon", Code = "NEON"},
+    ["MEGA NEON"] = {Multiplier = 4.0, Name = "Mega Neon", Code = "MEGA NEON"},
+    
+    -- Специальные модификаторы
+    ["NO POTION"] = {Multiplier = 0.9, Name = "No Potion", Code = "NO POTION"},
+    ["ONLY FLY"] = {Multiplier = 1.1, Name = "Only Fly", Code = "ONLY FLY"},
+    ["ONLY RIDE"] = {Multiplier = 1.15, Name = "Only Ride", Code = "ONLY RIDE"},
+    ["FR ONLY"] = {Multiplier = 1.4, Name = "Fly Ride Only", Code = "FR ONLY"},
+    
+    -- Редкость модификаторов
+    ["LEGENDARY"] = {Multiplier = 1.0, Name = "Legendary", Code = "LEGENDARY"},
+    ["ULTRA RARE"] = {Multiplier = 0.8, Name = "Ultra Rare", Code = "ULTRA RARE"},
+    ["RARE"] = {Multiplier = 0.6, Name = "Rare", Code = "RARE"},
+    ["UNCOMMON"] = {Multiplier = 0.4, Name = "Uncommon", Code = "UNCOMMON"},
+    ["COMMON"] = {Multiplier = 0.2, Name = "Common", Code = "COMMON"},
+    
+    -- Возраст модификаторы
+    ["NEWBORN"] = {Multiplier = 1.0, Name = "Newborn", Code = "NEWBORN"},
+    ["JUNIOR"] = {Multiplier = 1.05, Name = "Junior", Code = "JUNIOR"},
+    ["PRE-TEEN"] = {Multiplier = 1.1, Name = "Pre-Teen", Code = "PRE-TEEN"},
+    ["TEEN"] = {Multiplier = 1.15, Name = "Teen", Code = "TEEN"},
+    ["POST-TEEN"] = {Multiplier = 1.2, Name = "Post-Teen", Code = "POST-TEEN"},
+    ["FULL GROWN"] = {Multiplier = 1.25, Name = "Full Grown", Code = "FULL GROWN"},
+}
+
+-- Глобальные переменные
+SherikytCurrencyCalculator.PetDatabase = {}
+SherikytCurrencyCalculator.ActiveTrade = false
+SherikytCurrencyCalculator.TradeData = {
+    You = {},
+    Other = {}
+}
+SherikytCurrencyCalculator.CurrencyCache = {}
+SherikytCurrencyCalculator.GUI = nil
+-- Функция для создания ВСЕХ возможных вариаций питомцев
+function SherikytCurrencyCalculator:GenerateAllVariations()
+    local allVariations = {}
+    
+    -- Базовые данные из полной базы
+    for basePetName, baseData in pairs(self.CompletePetDatabase) do
+        -- Добавляем базовую версию
+        allVariations[basePetName] = baseData
+        
+        -- ========== ВАРИАЦИИ С POTIONS ==========
+        -- FR (Fly Ride)
+        allVariations[basePetName .. " (FR)"] = {
+            Value = math.floor(baseData.Value * self.PotionModifiers["FR"].Multiplier),
+            Rarity = baseData.Rarity,
+            Type = baseData.Type,
+            Variation = "Fly Ride"
+        }
+        
+        -- R (Ride)
+        allVariations[basePetName .. " (R)"] = {
+            Value = math.floor(baseData.Value * self.PotionModifiers["R"].Multiplier),
+            Rarity = baseData.Rarity,
+            Type = baseData.Type,
+            Variation = "Ride"
+        }
+        
+        -- F (Fly)
+        allVariations[basePetName .. " (F)"] = {
+            Value = math.floor(baseData.Value * self.PotionModifiers["F"].Multiplier),
+            Rarity = baseData.Rarity,
+            Type = baseData.Type,
+            Variation = "Fly"
+        }
+        
+        -- N (Normal/No Potion)
+        allVariations[basePetName .. " (N)"] = {
+            Value = math.floor(baseData.Value * self.PotionModifiers["N"].Multiplier),
+            Rarity = baseData.Rarity,
+            Type = baseData.Type,
+            Variation = "Normal"
+        }
+        
+        -- NO POTION
+        allVariations[basePetName .. " (No Potion)"] = {
+            Value = math.floor(baseData.Value * self.PotionModifiers["NO POTION"].Multiplier),
+            Rarity = baseData.Rarity,
+            Type = baseData.Type,
+            Variation = "No Potion"
+        }
+        
+        -- ========== НЕОНОВЫЕ ВАРИАЦИИ ==========
+        -- Neon
+        allVariations["Neon " .. basePetName] = {
+            Value = math.floor(baseData.Value * self.PotionModifiers["NEON"].Multiplier),
+            Rarity = baseData.Rarity,
+            Type = baseData.Type,
+            Variation = "Neon"
+        }
+        
+        -- Neon FR
+        allVariations["Neon " .. basePetName .. " (FR)"] = {
+            Value = math.floor(baseData.Value * self.PotionModifiers["NEON"].Multiplier * self.PotionModifiers["FR"].Multiplier),
+            Rarity = baseData.Rarity,
+            Type = baseData.Type,
+            Variation = "Neon Fly Ride"
+        }
+        
+        -- Neon R
+        allVariations["Neon " .. basePetName .. " (R)"] = {
+            Value = math.floor(baseData.Value * self.PotionModifiers["NEON"].Multiplier * self.PotionModifiers["R"].Multiplier),
+            Rarity = baseData.Rarity,
+            Type = baseData.Type,
+            Variation = "Neon Ride"
+        }
+        
+        -- Neon F
+        allVariations["Neon " .. basePetName .. " (F)"] = {
+            Value = math.floor(baseData.Value * self.PotionModifiers["NEON"].Multiplier * self.PotionModifiers["F"].Multiplier),
+            Rarity = baseData.Rarity,
+            Type = baseData.Type,
+            Variation = "Neon Fly"
+        }
+        
+        -- ========== MEGA NEON ВАРИАЦИИ ==========
+        -- Mega Neon
+        allVariations["Mega Neon " .. basePetName] = {
+            Value = math.floor(baseData.Value * self.PotionModifiers["MEGA NEON"].Multiplier),
+            Rarity = baseData.Rarity,
+            Type = baseData.Type,
+            Variation = "Mega Neon"
+        }
+        
+        -- Mega Neon FR
+        allVariations["Mega Neon " .. basePetName .. " (FR)"] = {
+            Value = math.floor(baseData.Value * self.PotionModifiers["MEGA NEON"].Multiplier * self.PotionModifiers["FR"].Multiplier),
+            Rarity = baseData.Rarity,
+            Type = baseData.Type,
+            Variation = "Mega Neon Fly Ride"
+        }
+        
+        -- Mega Neon R
+        allVariations["Mega Neon " .. basePetName .. " (R)"] = {
+            Value = math.floor(baseData.Value * self.PotionModifiers["MEGA NEON"].Multiplier * self.PotionModifiers["R"].Multiplier),
+            Rarity = baseData.Rarity,
+            Type = baseData.Type,
+            Variation = "Mega Neon Ride"
+        }
+        
+        -- Mega Neon F
+        allVariations["Mega Neon " .. basePetName .. " (F)"] = {
+            Value = math.floor(baseData.Value * self.PotionModifiers["MEGA NEON"].Multiplier * self.PotionModifiers["F"].Multiplier),
+            Rarity = baseData.Rarity,
+            Type = baseData.Type,
+            Variation = "Mega Neon Fly"
+        }
+        
+        -- ========== ВОЗРАСТНЫЕ ВАРИАЦИИ ==========
+        local ageModifiers = {
+            "Newborn",
+            "Junior", 
+            "Pre-Teen",
+            "Teen",
+            "Post-Teen",
+            "Full Grown"
+        }
+        
+        for _, age in ipairs(ageModifiers) do
+            -- С возрастом
+            allVariations[age .. " " .. basePetName] = {
+                Value = math.floor(baseData.Value * self.PotionModifiers[age:upper()].Multiplier),
+                Rarity = baseData.Rarity,
+                Type = baseData.Type,
+                Variation = age
+            }
+            
+            -- С возрастом и FR
+            allVariations[age .. " " .. basePetName .. " (FR)"] = {
+                Value = math.floor(baseData.Value * self.PotionModifiers[age:upper()].Multiplier * self.PotionModifiers["FR"].Multiplier),
+                Rarity = baseData.Rarity,
+                Type = baseData.Type,
+                Variation = age .. " Fly Ride"
+            }
+            
+            -- С возрастом и R
+            allVariations[age .. " " .. basePetName .. " (R)"] = {
+                Value = math.floor(baseData.Value * self.PotionModifiers[age:upper()].Multiplier * self.PotionModifiers["R"].Multiplier),
+                Rarity = baseData.Rarity,
+                Type = baseData.Type,
+                Variation = age .. " Ride"
+            }
+            
+            -- С возрастом и F
+            allVariations[age .. " " .. basePetName .. " (F)"] = {
+                Value = math.floor(baseData.Value * self.PotionModifiers[age:upper()].Multiplier * self.PotionModifiers["F"].Multiplier),
+                Rarity = baseData.Rarity,
+                Type = baseData.Type,
+                Variation = age .. " Fly"
+            }
+        end
+    end
+    
+    -- ========== СПЕЦИАЛЬНЫЕ ВАРИАЦИИ ==========
+    -- Добавляем специальные комбинации
+    local specialVariations = {
+        -- Тенистые драконы
+        ["Shadow Dragon (No Potion)"] = {Value = 1200, Rarity = "Legendary", Type = "Dragon"},
+        ["Neon Shadow Dragon"] = {Value = 2500, Rarity = "Legendary", Type = "Dragon"},
+        ["Mega Neon Shadow Dragon"] = {Value = 5000, Rarity = "Legendary", Type = "Dragon"},
+        
+        -- Бэт драконы
+        ["Bat Dragon (No Potion)"] = {Value = 1100, Rarity = "Legendary", Type = "Dragon"},
+        ["Neon Bat Dragon"] = {Value = 2200, Rarity = "Legendary", Type = "Dragon"},
+        ["Mega Neon Bat Dragon"] = {Value = 4400, Rarity = "Legendary", Type = "Dragon"},
+        
+        -- Жирафы
+        ["Giraffe (No Potion)"] = {Value = 1050, Rarity = "Legendary", Type = "Safari"},
+        ["Neon Giraffe"] = {Value = 2100, Rarity = "Legendary", Type = "Safari"},
+        ["Mega Neon Giraffe"] = {Value = 4200, Rarity = "Legendary", Type = "Safari"},
+        
+        -- Совы
+        ["Owl (No Potion)"] = {Value = 850, Rarity = "Legendary", Type = "Farm"},
+        ["Neon Owl"] = {Value = 1700, Rarity = "Legendary", Type = "Farm"},
+        ["Mega Neon Owl"] = {Value = 3400, Rarity = "Legendary", Type = "Farm"},
+        
+        -- Попугаи
+        ["Parrot (No Potion)"] = {Value = 800, Rarity = "Legendary", Type = "Pirate"},
+        ["Neon Parrot"] = {Value = 1600, Rarity = "Legendary", Type = "Pirate"},
+        ["Mega Neon Parrot"] = {Value = 3200, Rarity = "Legendary", Type = "Pirate"},
+    }
+    
+    -- Объединяем специальные вариации
+    for petName, data in pairs(specialVariations) do
+        allVariations[petName] = data
+    end
+    
+    return allVariations
+end
+
+-- Функция для получения всех возможных имен питомцев
+function SherikytCurrencyCalculator:GetAllPossibleNames()
+    local names = {}
+    
+    -- Добавляем все базовые имена
+    for name in pairs(self.CompletePetDatabase) do
+        table.insert(names, name)
+    end
+    
+    -- Добавляем все вариации
+    local variations = self:GenerateAllVariations()
+    for name in pairs(variations) do
+        table.insert(names, name)
+    end
+    
+    -- Сортируем по алфавиту
+    table.sort(names)
+    
+    return names
+end
+
+-- Функция для поиска питомца по частичному совпадению
+function SherikytCurrencyCalculator:FindPetByPartialName(partialName)
+    partialName = partialName:lower():gsub("%s+", " ")
+    
+    local allNames = self:GetAllPossibleNames()
+    
+    for _, fullName in ipairs(allNames) do
+        if fullName:lower():find(partialName, 1, true) then
+            return fullName
+        end
+    end
+    
+    -- Если не нашли, пробуем удалить potion модификаторы
+    local cleanName = partialName:gsub("%(.*%)", ""):gsub("neon", ""):gsub("mega", ""):gsub("%s+", " "):trim()
+    
+    for _, fullName in ipairs(allNames) do
+        local cleanFullName = fullName:lower():gsub("%(.*%)", ""):gsub("neon", ""):gsub("mega", ""):gsub("%s+", " "):trim()
+        if cleanFullName == cleanName then
+            return fullName
+        end
+    end
+    
+    return nil
+end
+-- Улучшенный класс для питомца
+local Pet = {}
+Pet.__index = Pet
+
+function Pet.new(name, rarity, potions, variation, age)
+    local self = setmetatable({}, Pet)
+    self.Name = name
+    self.BaseName = self:ExtractBaseName(name)
+    self.Rarity = rarity or "Unknown"
+    self.Potions = potions or {}
+    self.Variation = variation or "Normal"
+    self.Age = age or "Newborn"
+    self.CurrencyValue = 0
+    self.Type = "Unknown"
+    self.IsNeon = name:lower():find("neon")
+    self.IsMega = name:lower():find("mega")
+    self.IsFlyRide = false
+    self.IsFly = false
+    self.IsRide = false
+    self.IsNoPotion = false
+    
+    -- Определяем potion статус
+    self:AnalyzePotionStatus(name)
+    
+    return self
+end
+
+function Pet:ExtractBaseName(fullName)
+    -- Убираем модификаторы
+    local baseName = fullName:gsub("Neon", ""):gsub("Mega", ""):gsub("%(.*%)", "")
+    baseName = baseName:gsub("%s+", " "):trim()
+    
+    -- Убираем возраст
+    local ages = {"Newborn", "Junior", "Pre%-Teen", "Teen", "Post%-Teen", "Full Grown"}
+    for _, age in ipairs(ages) do
+        baseName = baseName:gsub(age, "")
+    end
+    
+    return baseName:gsub("%s+", " "):trim()
+end
+
+function Pet:AnalyzePotionStatus(fullName)
+    local lowerName = fullName:lower()
+    
+    self.IsFlyRide = lowerName:find("fr") or lowerName:find("fly ride")
+    self.IsFly = lowerName:find("%(f%)") or (lowerName:find("fly") and not lowerName:find("ride"))
+    self.IsRide = lowerName:find("%(r%)") or (lowerName:find("ride") and not lowerName:find("fly"))
+    self.IsNoPotion = lowerName:find("no potion") or lowerName:find("%(n%)")
+    
+    -- Определяем potions массив
+    if self.IsFlyRide then
+        table.insert(self.Potions, "FR")
+    elseif self.IsFly then
+        table.insert(self.Potions, "F")
+    elseif self.IsRide then
+        table.insert(self.Potions, "R")
+    elseif self.IsNoPotion then
+        table.insert(self.Potions, "N")
+    end
+end
+
+function Pet:GetFullDisplayName()
+    local parts = {}
+    
+    -- Возраст
+    if self.Age ~= "Newborn" then
+        table.insert(parts, self.Age)
+    end
+    
+    -- Neon/Mega
+    if self.IsMega then
+        table.insert(parts, "Mega Neon")
+    elseif self.IsNeon then
+        table.insert(parts, "Neon")
+    end
+    
+    -- Базовое имя
+    table.insert(parts, self.BaseName)
+    
+    -- Potions
+    if #self.Potions > 0 then
+        local potionStr = "(" .. table.concat(self.Potions, ", ") .. ")"
+        table.insert(parts, potionStr)
+    end
+    
+    return table.concat(parts, " ")
+end
+
+function Pet:CalculateMultiplier(calculator)
+    local multiplier = 1.0
+    
+    -- Модификатор Neon
+    if self.IsNeon and not self.IsMega then
+        multiplier = multiplier * calculator.PotionModifiers["NEON"].Multiplier
+    elseif self.IsMega then
+        multiplier = multiplier * calculator.PotionModifiers["MEGA NEON"].Multiplier
+    end
+    
+    -- Модификаторы potions
+    for _, potion in ipairs(self.Potions) do
+        if calculator.PotionModifiers[potion] then
+            multiplier = multiplier * calculator.PotionModifiers[potion].Multiplier
+        end
+    end
+    
+    -- Модификатор возраста
+    if calculator.PotionModifiers[self.Age:upper():gsub("-", "_")] then
+        multiplier = multiplier * calculator.PotionModifiers[self.Age:upper():gsub("-", "_")].Multiplier
+    end
+    
+    return multiplier
+end
+-- Улучшенный парсинг строки с питомцем
+function SherikytCurrencyCalculator:ParsePetStringAdvanced(text)
+    if not text or text == "" then
+        return nil
+    end
+    
+    text = text:gsub("%s+", " "):trim()
+    
+    local result = {
+        OriginalText = text,
+        BaseName = "",
+        Age = "Newborn",
+        IsNeon = false,
+        IsMega = false,
+        Potions = {},
+        Variation = "Normal"
+    }
+    
+    -- Определяем возраст
+    local ages = {
+        "Newborn", "Junior", "Pre-Teen", "Teen", "Post-Teen", "Full Grown"
+    }
+    
+    for _, age in ipairs(ages) do
+        if text:lower():find(age:lower()) then
+            result.Age = age
+            text = text:gsub(age, ""):gsub("%s+", " "):trim()
+            break
+        end
+    end
+    
+    -- Определяем Neon/Mega
+    if text:lower():find("mega neon") then
+        result.IsMega = true
+        result.IsNeon = true
+        text = text:gsub("Mega Neon", ""):gsub("mega neon", ""):gsub("%s+", " "):trim()
+    elseif text:lower():find("neon") then
+        result.IsNeon = true
+        text = text:gsub("Neon", ""):gsub("neon", ""):gsub("%s+", " "):trim()
+    end
+    
+    -- Определяем Potions в скобках
+    local potionPatterns = {
+        {"%((.-)%)", true}, -- Все в скобках
+        {"FR", "FR"},
+        {"Fly Ride", "FR"},
+        {"R", "R"},
+        {"Ride", "R"},
+        {"F", "F"},
+        {"Fly", "F"},
+        {"N", "N"},
+        {"No Potion", "N"}
+    }
+    
+    for _, pattern in ipairs(potionPatterns) do
+        local matchPattern, potionCode = unpack(pattern)
+        
+        if type(matchPattern) == "string" then
+            local match = text:match(matchPattern)
+            if match then
+                if potionCode == true then
+                    -- Разбираем содержимое скобок
+                    local potionsInBrackets = match:gsub("[%(%)]", ""):split(", ")
+                    for _, pot in ipairs(potionsInBrackets) do
+                        table.insert(result.Potions, pot:upper())
+                    end
+                else
+                    table.insert(result.Potions, potionCode)
+                end
+                text = text:gsub(matchPattern, ""):gsub("%s+", " "):trim()
+            end
+        end
+    end
+    
+    -- Очищаем текст от лишних символов
+    text = text:gsub("[%(%)]", ""):gsub("%s+", " "):trim()
+    
+    result.BaseName = text
+    
+    return result
+end
+
+-- Поиск питомца в базе данных с учетом всех вариаций
+function SherikytCurrencyCalculator:FindPetInDatabase(parsedData)
+    if not parsedData then return nil end
+    
+    local allVariations = self:GenerateAllVariations()
+    
+    -- Пробуем найти точное совпадение
+    for petName, petData in pairs(allVariations) do
+        local lowerPetName = petName:lower()
+        local searchName = parsedData.BaseName:lower()
+        
+        -- Проверяем разные варианты
+        if lowerPetName == searchName then
+            return petName, petData
+        end
+        
+        -- Проверяем без учета возраста и neon
+        local cleanPetName = lowerPetName:gsub("newborn", ""):gsub("junior", ""):gsub("pre%-teen", "")
+            :gsub("teen", ""):gsub("post%-teen", ""):gsub("full grown", "")
+            :gsub("neon", ""):gsub("mega", "")
+            :gsub("%(.*%)", ""):gsub("%s+", " "):trim()
+        
+        local cleanSearchName = searchName:gsub("newborn", ""):gsub("junior", ""):gsub("pre%-teen", "")
+            :gsub("teen", ""):gsub("post%-teen", ""):gsub("full grown", "")
+            :gsub("neon", ""):gsub("mega", "")
+            :gsub("%(.*%)", ""):gsub("%s+", " "):trim()
+        
+        if cleanPetName == cleanSearchName then
+            -- Проверяем совпадение по модификаторам
+            local hasNeon = parsedData.IsNeon and lowerPetName:find("neon")
+            local hasMega = parsedData.IsMega and lowerPetName:find("mega")
+            local hasAge = parsedData.Age ~= "Newborn" and lowerPetName:find(parsedData.Age:lower())
+            
+            if (not parsedData.IsNeon or hasNeon) and 
+               (not parsedData.IsMega or hasMega) and
+               (parsedData.Age == "Newborn" or hasAge) then
+                return petName, petData
+            end
+        end
+    end
+    
+    -- Если не нашли, ищем по базовому имени
+    for baseName, baseData in pairs(self.CompletePetDatabase) do
+        if baseName:lower():find(parsedData.BaseName:lower()) then
+            -- Создаем вариацию на лету
+            local multiplier = 1.0
+            
+            if parsedData.IsMega then
+                multiplier = multiplier * self.PotionModifiers["MEGA NEON"].Multiplier
+            elseif parsedData.IsNeon then
+                multiplier = multiplier * self.PotionModifiers["NEON"].Multiplier
+            end
+            
+            for _, potion in ipairs(parsedData.Potions) do
+                if self.PotionModifiers[potion] then
+                    multiplier = multiplier * self.PotionModifiers[potion].Multiplier
+                end
+            end
+            
+            local estimatedValue = math.floor(baseData.Value * multiplier)
+            
+            return baseName, {
+                Value = estimatedValue,
+                Rarity = baseData.Rarity,
+                Type = baseData.Type,
+                Variation = "Estimated"
+            }
+        end
+    end
+    
+    return nil
+end
+
+-- Автоматическое определение питомцев в трейде
+function SherikytCurrencyCalculator:AutoDetectPetsInTrade()
+    local tradeFrame = self:FindTradeElements()
+    if not tradeFrame then return {}, {} end
+    
+    local yourItems = {}
+    local otherItems = {}
+    
+    -- Сканируем все TextLabel и TextButton
+    local descendants = tradeFrame:GetDescendants()
+    
+    for _, element in pairs(descendants) do
+        if element:IsA("TextLabel") or element:IsA("TextButton") then
+            local text = element.Text
+            if text and text ~= "" and text:len() > 2 then
+                -- Пропускаем системные тексты
+                if text:lower():find("accept") or text:lower():find("decline") or
+                   text:lower():find("trade") or text:lower():find("offer") then
+                    continue
+                end
+                
+                -- Парсим текст
+                local parsedData = self:ParsePetStringAdvanced(text)
+                if parsedData and parsedData.BaseName ~= "" then
+                    local petName, petData = self:FindPetInDatabase(parsedData)
+                    
+                    if petName then
+                        local pet = Pet.new(
+                            petName,
+                            petData.Rarity,
+                            parsedData.Potions,
+                            petData.Variation or "Normal",
+                            parsedData.Age
+                        )
+                        
+                        pet.CurrencyValue = petData.Value
+                        pet.Type = petData.Type
+                        
+                        -- Определяем сторону
+                        local isYourSide = self:IsElementOnYourSide(element)
+                        
+                        if isYourSide then
+                            table.insert(yourItems, pet)
+                        else
+                            table.insert(otherItems, pet)
+                        end
+                        
+                        if self.Config.DEBUG_MODE then
+                            print("[AutoDetect] Найден питомец:", pet:GetFullDisplayName(), "Value:", pet.CurrencyValue)
+                        end
+                    end
+                end
+            end
+        end
+        
+        -- Также проверяем ImageLabel на подсказки
+        if element:IsA("ImageLabel") then
+            local tooltip = element:FindFirstChildWhichIsA("TextLabel")
+            if tooltip and tooltip.Text ~= "" then
+                local parsedData = self:ParsePetStringAdvanced(tooltip.Text)
+                if parsedData then
+                    -- Аналогичная обработка...
+                end
+            end
+        end
+    end
+    
+    return yourItems, otherItems
+end
+-- Создание расширенного GUI
+function SherikytCurrencyCalculator:CreateEnhancedGUI()
+    if self.GUI and self.GUI.Container then
+        self.GUI.Container:Destroy()
+    end
+    
+    local container = Instance.new("Frame")
+    container.Name = "SherikytEnhancedCurrencyGUI"
+    container.Size = UDim2.new(0, 400, 0, 350)
+    container.Position = UDim2.new(0, 10, 0, 10)
+    container.BackgroundColor3 = Color3.fromRGB(20, 20, 30)
+    container.BackgroundTransparency = 0.1
+    container.BorderSizePixel = 2
+    container.BorderColor3 = Color3.fromRGB(100, 100, 255)
+    container.Visible = false
+    
+    -- UI Corners
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0, 12)
+    corner.Parent = container
+    
+    -- UI Stroke
+    local stroke = Instance.new("UIStroke")
+    stroke.Color = Color3.fromRGB(150, 150, 255)
+    stroke.Thickness = 2
+    stroke.Parent = container
+    
+    -- Gradient
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(30, 30, 50)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(20, 20, 40))
+    })
+    gradient.Parent = container
+    
+    -- Заголовок
+    local title = Instance.new("TextLabel")
+    title.Name = "Title"
+    title.Text = "SHERIKYT CURRENCY MASTER"
+    title.Size = UDim2.new(1, 0, 0, 40)
+    title.Position = UDim2.new(0, 0, 0, 0)
+    title.BackgroundColor3 = Color3.fromRGB(40, 40, 80)
+    title.TextColor3 = Color3.fromRGB(255, 255, 100)
+    title.Font = Enum.Font.GothamBold
+    title.TextSize = 18
+    title.TextStrokeTransparency = 0.5
+    title.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+    title.Parent = container
+    
+    local titleCorner = Instance.new("UICorner")
+    titleCorner.CornerRadius = UDim.new(0, 12)
+    titleCorner.Parent = title
+    
+    -- Основная информация
+    local infoFrame = Instance.new("Frame")
+    infoFrame.Name = "InfoFrame"
+    infoFrame.Size = UDim2.new(1, -20, 0, 70)
+    infoFrame.Position = UDim2.new(0, 10, 0, 50)
+    infoFrame.BackgroundTransparency = 1
+    infoFrame.Parent = container
+    
+    -- YOU секция
+    local youSection = Instance.new("Frame")
+    youSection.Name = "YouSection"
+    youSection.Size = UDim2.new(0.48, 0, 1, 0)
+    youSection.Position = UDim2.new(0, 0, 0, 0)
+    youSection.BackgroundColor3 = Color3.fromRGB(30, 60, 30)
+    youSection.BackgroundTransparency = 0.7
+    youSection.Parent = infoFrame
+    
+    local youCorner = Instance.new("UICorner")
+    youCorner.CornerRadius = UDim.new(0, 8)
+    youCorner.Parent = youSection
+    
+    local youLabel = Instance.new("TextLabel")
+    youLabel.Name = "YouLabel"
+    youLabel.Text = "YOU\n0"
+    youLabel.Size = UDim2.new(1, 0, 1, 0)
+    youLabel.Position = UDim2.new(0, 0, 0, 0)
+    youLabel.BackgroundTransparency = 1
+    youLabel.TextColor3 = Color3.fromRGB(100, 255, 100)
+    youLabel.Font = Enum.Font.GothamBold
+    youLabel.TextSize = 16
+    youLabel.TextYAlignment = Enum.TextYAlignment.Center
+    youLabel.Parent = youSection
+    
+    -- OTHER секция
+    local otherSection = Instance.new("Frame")
+    otherSection.Name = "OtherSection"
+    otherSection.Size = UDim2.new(0.48, 0, 1, 0)
+    otherSection.Position = UDim2.new(0.52, 0, 0, 0)
+    otherSection.BackgroundColor3 = Color3.fromRGB(60, 30, 30)
+    otherSection.BackgroundTransparency = 0.7
+    otherSection.Parent = infoFrame
+    
+    local otherCorner = Instance.new("UICorner")
+    otherCorner.CornerRadius = UDim.new(0, 8)
+    otherCorner.Parent = otherSection
+    
+    local otherLabel = Instance.new("TextLabel")
+    otherLabel.Name = "OtherLabel"
+    otherLabel.Text = "OTHER\n0"
+    otherLabel.Size = UDim2.new(1, 0, 1, 0)
+    otherLabel.Position = UDim2.new(0, 0, 0, 0)
+    otherLabel.BackgroundTransparency = 1
+    otherLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+    otherLabel.Font = Enum.Font.GothamBold
+    otherLabel.TextSize = 16
+    otherLabel.TextYAlignment = Enum.TextYAlignment.Center
+    otherLabel.Parent = otherSection
+    
+    -- Итоговая разница
+    local differenceFrame = Instance.new("Frame")
+    differenceFrame.Name = "DifferenceFrame"
+    differenceFrame.Size = UDim2.new(1, -20, 0, 40)
+    differenceFrame.Position = UDim2.new(0, 10, 0, 130)
+    differenceFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 60)
+    differenceFrame.Parent = container
+    
+    local diffCorner = Instance.new("UICorner")
+    diffCorner.CornerRadius = UDim.new(0, 8)
+    diffCorner.Parent = differenceFrame
+    
+    local differenceLabel = Instance.new("TextLabel")
+    differenceLabel.Name = "DifferenceLabel"
+    differenceLabel.Text = "FAIR TRADE"
+    differenceLabel.Size = UDim2.new(1, 0, 1, 0)
+    differenceLabel.Position = UDim2.new(0, 0, 0, 0)
+    differenceLabel.BackgroundTransparency = 1
+    differenceLabel.TextColor3 = Color3.fromRGB(255, 255, 100)
+    differenceLabel.Font = Enum.Font.GothamBold
+    differenceLabel.TextSize = 14
+    differenceLabel.TextYAlignment = Enum.TextYAlignment.Center
+    differenceLabel.Parent = differenceFrame
+    
+    -- Список питомцев с прокруткой
+    local petsScrollFrame = Instance.new("ScrollingFrame")
+    petsScrollFrame.Name = "PetsScrollFrame"
+    petsScrollFrame.Size = UDim2.new(1, -20, 0, 150)
+    petsScrollFrame.Position = UDim2.new(0, 10, 0, 180)
+    petsScrollFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 35)
+    petsScrollFrame.BackgroundTransparency = 0.3
+    petsScrollFrame.BorderSizePixel = 0
+    petsScrollFrame.ScrollBarThickness = 8
+    petsScrollFrame.ScrollBarImageColor3 = Color3.fromRGB(100, 100, 150)
+    petsScrollFrame.Parent = container
+    
+    local scrollCorner = Instance.new("UICorner")
+    scrollCorner.CornerRadius = UDim.new(0, 8)
+    scrollCorner.Parent = petsScrollFrame
+    
+    local petsListLayout = Instance.new("UIListLayout")
+    petsListLayout.Parent = petsScrollFrame
+    petsListLayout.SortOrder = Enum.SortOrder.LayoutOrder
+    petsListLayout.Padding = UDim.new(0, 2)
+    
+    -- Статус бар
+    local statusBar = Instance.new("Frame")
+    statusBar.Name = "StatusBar"
+    statusBar.Size = UDim2.new(1, -20, 0, 20)
+    statusBar.Position = UDim2.new(0, 10, 0, 340)
+    statusBar.BackgroundColor3 = Color3.fromRGB(30, 30, 40)
+    statusBar.Parent = container
+    
+    local statusCorner = Instance.new("UICorner")
+    statusCorner.CornerRadius = UDim.new(0, 4)
+    statusCorner.Parent = statusBar
+    
+    local statusLabel = Instance.new("TextLabel")
+    statusLabel.Name = "StatusLabel"
+    statusLabel.Text = "Готов к трейду"
+    statusLabel.Size = UDim2.new(1, 0, 1, 0)
+    statusLabel.Position = UDim2.new(0, 0, 0, 0)
+    statusLabel.BackgroundTransparency = 1
+    statusLabel.TextColor3 = Color3.fromRGB(200, 200, 255)
+    statusLabel.Font = Enum.Font.Gotham
+    statusLabel.TextSize = 12
+    statusLabel.TextXAlignment = Enum.TextXAlignment.Left
+    statusLabel.Parent = statusBar
+    
+    -- Создаем GUI объект
+    local guiObj = {
+        Container = container,
+        YouLabel = youLabel,
+        OtherLabel = otherLabel,
+        DifferenceLabel = differenceLabel,
+        PetsScrollFrame = petsScrollFrame,
+        StatusLabel = statusLabel
+    }
+    
+    container.Parent = playerGui
+    
+    return guiObj
+end
+-- Обновление расширенного GUI
+function SherikytCurrencyCalculator:UpdateEnhancedGUI(yourItems, otherItems)
+    if not self.GUI then
+        self.GUI = self:CreateEnhancedGUI()
+    end
+    
+    self.GUI.Container.Visible = true
+    
+    -- Расчет сумм
+    local yourTotal = 0
+    local otherTotal = 0
+    
+    for _, pet in pairs(yourItems) do
+        yourTotal = yourTotal + (pet.CurrencyValue or 0)
+    end
+    
+    for _, pet in pairs(otherItems) do
+        otherTotal = otherTotal + (pet.CurrencyValue or 0)
+    end
+    
+    -- Обновление YOU секции
+    self.GUI.YouLabel.Text = string.format("YOU\n%d", yourTotal)
+    
+    -- Обновление OTHER секции
+    self.GUI.OtherLabel.Text = string.format("OTHER\n%d", otherTotal)
+    
+    -- Расчет и отображение разницы
+    local difference = yourTotal - otherTotal
+    local differenceText = ""
+    local differenceColor = Color3.fromRGB(255, 255, 255)
+    
+    if math.abs(difference) < 10 then
+        differenceText = "⚖️ FAIR TRADE"
+        differenceColor = Color3.fromRGB(100, 255, 100)
+    elseif difference > 0 then
+        if difference > 100 then
+            differenceText = string.format("🎉 BIG WIN +%d", difference)
+            differenceColor = Color3.fromRGB(0, 255, 0)
+        else
+            differenceText = string.format("👍 WIN +%d", difference)
+            differenceColor = Color3.fromRGB(150, 255, 150)
+        end
+    else
+        local loss = math.abs(difference)
+        if loss > 100 then
+            differenceText = string.format("💀 BIG LOSS -%d", loss)
+            differenceColor = Color3.fromRGB(255, 50, 50)
+        else
+            differenceText = string.format("⚠️ LOSE -%d", loss)
+            differenceColor = Color3.fromRGB(255, 150, 150)
+        end
+    end
+    
+    self.GUI.DifferenceLabel.Text = differenceText
+    self.GUI.DifferenceLabel.TextColor3 = differenceColor
+    
+    -- Обновление списка питомцев
+    local petsFrame = self.GUI.PetsScrollFrame
+    petsFrame:ClearAllChildren()
+    
+    local function createPetEntry(pet, isYours, index)
+        local entryFrame = Instance.new("Frame")
+        entryFrame.Name = "PetEntry_" .. index
+        entryFrame.Size = UDim2.new(1, 0, 0, 30)
+        entryFrame.BackgroundTransparency = 0.8
+        entryFrame.BackgroundColor3 = isYours and Color3.fromRGB(30, 60, 30) or Color3.fromRGB(60, 30, 30)
+        entryFrame.LayoutOrder = index
+        
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0, 6)
+        corner.Parent = entryFrame
+        
+        -- Имя питомца
+        local nameLabel = Instance.new("TextLabel")
+        nameLabel.Name = "NameLabel"
+        nameLabel.Size = UDim2.new(0.6, 0, 1, 0)
+        nameLabel.Position = UDim2.new(0, 5, 0, 0)
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Text = pet:GetFullDisplayName()
+        nameLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+        nameLabel.Font = Enum.Font.Gotham
+        nameLabel.TextSize = 12
+        nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+        nameLabel.TextTruncate = Enum.TextTruncate.AtEnd
+        nameLabel.Parent = entryFrame
+        
+        -- Стоимость
+        local valueLabel = Instance.new("TextLabel")
+        valueLabel.Name = "ValueLabel"
+        valueLabel.Size = UDim2.new(0.3, 0, 1, 0)
+        valueLabel.Position = UDim2.new(0.6, 0, 0, 0)
+        valueLabel.BackgroundTransparency = 1
+        valueLabel.Text = tostring(pet.CurrencyValue)
+        valueLabel.TextColor3 = Color3.fromRGB(255, 255, 100)
+        valueLabel.Font = Enum.Font.GothamBold
+        valueLabel.TextSize = 12
+        valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+        valueLabel.Parent = entryFrame
+        
+        -- Иконка редкости
+        local rarityIcon = Instance.new("TextLabel")
+        rarityIcon.Name = "RarityIcon"
+        rarityIcon.Size = UDim2.new(0, 20, 0, 20)
+        rarityIcon.Position = UDim2.new(1, -25, 0.5, -10)
+        rarityIcon.BackgroundTransparency = 1
+        rarityIcon.Text = self:GetRarityIcon(pet.Rarity)
+        rarityIcon.TextColor3 = self:GetRarityColor(pet.Rarity)
+        rarityIcon.Font = Enum.Font.GothamBold
+        rarityIcon.TextSize = 14
+        rarityIcon.Parent = entryFrame
+        
+        entryFrame.Parent = petsFrame
+    end
+    
+    -- Добавляем питомцев игрока
+    for i, pet in ipairs(yourItems) do
+        createPetEntry(pet, true, i)
+    end
+    
+    -- Добавляем питомцев оппонента
+    for i, pet in ipairs(otherItems) do
+        createPetEntry(pet, false, #yourItems + i)
+    end
+    
+    -- Обновляем размер контента
+    local totalItems = #yourItems + #otherItems
+    petsFrame.CanvasSize = UDim2.new(0, 0, 0, totalItems * 32)
+    
+    -- Обновляем статус
+    local statusText = string.format("Питомцев: %d | Обнаружен трейд", totalItems)
+    self.GUI.StatusLabel.Text = statusText
+    
+    -- Сохраняем данные
+    self.TradeData.You = yourItems
+    self.TradeData.Other = otherItems
+end
+
+-- Функции для иконок редкости
+function SherikytCurrencyCalculator:GetRarityIcon(rarity)
+    local icons = {
+        ["Legendary"] = "⭐",
+        ["Ultra Rare"] = "🔮",
+        ["Rare"] = "🔵",
+        ["Uncommon"] = "🟢",
+        ["Common"] = "⚪",
+        ["Limited"] = "💎",
+        ["Vehicle"] = "🚗",
+        ["Stroller"] = "👶",
+        ["Pet Wear"] = "👕"
+    }
+    
+    return icons[rarity] or "❓"
+end
+
+function SherikytCurrencyCalculator:GetRarityColor(rarity)
+    local colors = {
+        ["Legendary"] = Color3.fromRGB(255, 215, 0),
+        ["Ultra Rare"] = Color3.fromRGB(255, 105, 180),
+        ["Rare"] = Color3.fromRGB(0, 150, 255),
+        ["Uncommon"] = Color3.fromRGB(0, 200, 0),
+        ["Common"] = Color3.fromRGB(200, 200, 200),
+        ["Limited"] = Color3.fromRGB(255, 50, 50),
+        ["Vehicle"] = Color3.fromRGB(150, 75, 0),
+        ["Stroller"] = Color3.fromRGB(255, 150, 255),
+        ["Pet Wear"] = Color3.fromRGB(255, 200, 100)
+    }
+    
+    return colors[rarity] or Color3.fromRGB(255, 255, 255)
+end
+
+-- Основной цикл обновления
+function SherikytCurrencyCalculator:EnhancedUpdate()
+    local yourItems, otherItems = self:AutoDetectPetsInTrade()
+    
+    if #yourItems > 0 or #otherItems > 0 then
+        self.ActiveTrade = true
+        self:UpdateEnhancedGUI(yourItems, otherItems)
+        
+        if self.Config.DEBUG_MODE and (#yourItems > 0 or #otherItems > 0) then
+            print(string.format("[EnhancedUpdate] Обнаружено: %d ваших, %d чужих питомцев", #yourItems, #otherItems))
+        end
+    else
+        if self.ActiveTrade then
+            self.ActiveTrade = false
+            if self.GUI then
+                self.GUI.Container.Visible = false
+            end
+        end
+    end
+end
+-- Инициализация полной системы
+function SherikytCurrencyCalculator:FullInitialize()
+    -- Загружаем полную базу данных
+    self.PetDatabase = self:GenerateAllVariations()
+    
+    -- Создаем расширенный GUI
+    self:CreateEnhancedGUI()
+    
+    -- Настраиваем команды чата
+    self:SetupChatCommands()
+    
+    -- Запускаем основной цикл
+    local connection = RunService.Heartbeat:Connect(function(deltaTime)
+        self:EnhancedUpdate()
+    end)
+    
+    self.Connection = connection
+    
+    -- Выводим информацию о загрузке
+    local totalPets = 0
+    for _ in pairs(self.PetDatabase) do totalPets = totalPets + 1 end
+    
+    print("=========================================")
+    print("SHERIKYT CURRENCY CALCULATOR v2.0")
+    print("=========================================")
+    print("Загружено питомцев: " .. totalPets)
+    print("База данных: ПОЛНАЯ (все питомцы и вариации)")
+    print("Модификаторы: Все FR/N/M/Neon/Mega Neon")
+    print("Команды: /currency, /help, /debug")
+    print("=========================================")
+    
+    if self.Config.DEBUG_MODE then
+        print("[DEBUG] Полная база загружена успешно!")
+    end
+    
+    return true
+end
+
+-- Команды чата
+function SherikytCurrencyCalculator:SetupChatCommands()
+    local function onPlayerChatted(message, recipient, speaker)
+        if speaker ~= player then return end
+        
+        message = message:lower():trim()
+        
+        if message == "/currency" or message == "/cc" then
+            if self.GUI then
+                self.GUI.Container.Visible = not self.GUI.Container.Visible
+                speaker:SetExtraData("CurrencyGUI", self.GUI.Container.Visible and "ON" or "OFF")
+            end
+            return true
+            
+        elseif message == "/help currency" then
+            speaker:SetExtraData("Help", [[
+Sherikyt Currency Commands:
+/currency - Показать/скрыть интерфейс
+/cc - То же самое
+/debug - Включить/выключить отладку
+/pets - Показать количество питомцев в базе
+            ]])
+            return true
+            
+        elseif message == "/debug" then
+            self.Config.DEBUG_MODE = not self.Config.DEBUG_MODE
+            speaker:SetExtraData("DebugMode", self.Config.DEBUG_MODE and "ON" or "OFF")
+            print("[Sherikyt] Debug Mode: " .. (self.Config.DEBUG_MODE and "ENABLED" or "DISABLED"))
+            return true
+            
+        elseif message == "/pets" then
+            local total = 0
+            for _ in pairs(self.PetDatabase) do total = total + 1 end
+            speaker:SetExtraData("PetCount", "Total pets in database: " .. total)
+            print("[Sherikyt] Total pets in database: " .. total)
+            return true
+        end
+    end
+    
+    -- Подключаем обработчик чата
+    local success, err = pcall(function()
+        local chatEvents = ReplicatedStorage:WaitForChild("DefaultChatSystemChatEvents")
+        if chatEvents then
+            chatEvents.OnMessageDoneFiltering.OnClientEvent:Connect(onPlayerChatted)
+        end
+    end)
+    
+    if not success and self.Config.DEBUG_MODE then
+        print("[Sherikyt] Chat commands setup failed:", err)
+    end
+end
+
+-- Экспорт данных для отладки
+function SherikytCurrencyCalculator:ExportFullDatabase()
+    local export = {
+        Timestamp = os.time(),
+        TotalPets = 0,
+        PetsByRarity = {},
+        PetsByType = {}
+    }
+    
+    for petName, petData in pairs(self.PetDatabase) do
+        export.TotalPets = export.TotalPets + 1
+        
+        -- Группируем по редкости
+        if not export.PetsByRarity[petData.Rarity] then
+            export.PetsByRarity[petData.Rarity] = 0
+        end
+        export.PetsByRarity[petData.Rarity] = export.PetsByRarity[petData.Rarity] + 1
+        
+        -- Группируем по типу
+        if not export.PetsByType[petData.Type] then
+            export.PetsByType[petData.Type] = 0
+        end
+        export.PetsByType[petData.Type] = export.PetsByType[petData.Type] + 1
+    end
+    
+    return export
+end
+
+-- Основная функция запуска
+function SherikytCurrencyCalculator:StartFullSystem()
+    -- Ждем полной загрузки игры
+    task.wait(3)
+    
+    -- Инициализируем полную систему
+    local success, err = pcall(function()
+        self:FullInitialize()
+    end)
+    
+    if not success then
+        warn("[Sherikyt] Ошибка инициализации полной системы:", err)
+        
+        -- Пробуем базовую инициализацию
+        task.wait(2)
+        self:FullInitialize()
+    end
+    
+    -- Периодическое обновление статуса
+    while true do
+        task.wait(10)
+        
+        if self.Config.DEBUG_MODE and self.ActiveTrade then
+            local yourTotal = 0
+            local otherTotal = 0
+            
+            for _, pet in pairs(self.TradeData.You) do
+                yourTotal = yourTotal + (pet.CurrencyValue or 0)
+            end
+            
+            for _, pet in pairs(self.TradeData.Other) do
+                otherTotal = otherTotal + (pet.CurrencyValue or 0)
+            end
+            
+            print(string.format("[Sherikyt] Trade Status: You=%d, Other=%d, Diff=%d", 
+                yourTotal, otherTotal, yourTotal - otherTotal))
+        end
+    end
+end
+
+-- Автоматический запуск при загрузке игры
+coroutine.wrap(function()
+    task.wait(5) -- Ждем загрузки игры
+    
+    local success, err = pcall(function()
+        SherikytCurrencyCalculator:StartFullSystem()
+    end)
+    
+    if not success then
+        warn("=========================================")
+        warn("SHERIKYT CURRENCY CALCULATOR ERROR")
+        warn("=========================================")
+        warn("Error:", err)
+        warn("Trying alternative initialization...")
+        
+        -- Альтернативная попытка
+        task.wait(2)
+        SherikytCurrencyCalculator:StartFullSystem()
+    end
+end)()
+
+-- Экспорт модуля
+return SherikytCurrencyCalculator
